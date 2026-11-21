@@ -6,8 +6,8 @@ const now=()=>performance.now()/1000, cur=()=>playing?Math.min(dur,tBase+(now()-
 let parts=[]; try{ const j=await (await fetch('assets/parts.json')).json(); parts=j.parts; dur=j.length; sk.max=Math.round(dur*10); }catch(e){}
 // Golden frames: what the ORIGINAL CANDYD.EXE drew (512x256 surface, captured under emulation every 0.2 s, see re/harness.py), letterboxed in 640x480.
 // parts.json = the original's 14-part table at music times.
-const STEP=0.2, cache=new Map();
-const frameAt=i=>{ let im=cache.get(i); if(!im){ im=new Image(); im.src='assets/gold/g'+String(i).padStart(4,'0')+'.webp'; cache.set(i,im); if(cache.size>400) cache.delete(cache.keys().next().value); } return im; };
+const STEP=0.2, cache=new Map(), urls=new Map();   // urls: frame index -> blob URL of the preloaded file
+const frameAt=i=>{ let im=cache.get(i); if(!im){ im=new Image(); im.src=urls.get(i)||'assets/gold/g'+String(i).padStart(4,'0')+'.webp'; im.decode().catch(()=>{}); cache.set(i,im); if(cache.size>400) cache.delete(cache.keys().next().value); } return im; };
 import {renderPart0,loadPart0,W as PW,H as PH} from './part0.js';
 let shown=-1, A0=null; const js=$('js'), buf0=new Uint8ClampedArray(PW*PH*4), id0=new ImageData(buf0,PW,PH);
 try{ A0=await loadPart0('assets/part0.bin'); }catch(e){ js.disabled=true; }
@@ -32,7 +32,7 @@ async function start(){
 }
 function seek(t){ t=Math.max(0,Math.min(dur-0.01,t)); tBase=t; wall0=now(); cp&&cp.setPos(t); shown=-1; }
 async function toggle(){
-  if(!started) return start();
+  if(!started) return ready&&start();
   if(playing){ cp.pause(); tBase=cur(); playing=false; $('pp').textContent='Play'; }
   else { cp.unpause(); wall0=now(); playing=true; ac.resume(); $('pp').textContent='Pause'; }
 }
@@ -44,4 +44,7 @@ addEventListener('keydown',e=>{ if(e.target.tagName==='BUTTON'&&e.key===' ') ret
   else if(e.key==='ArrowLeft'||e.key==='ArrowRight'){ e.preventDefault(); seek(cur()+(e.key==='ArrowLeft'?-1:1)*(e.shiftKey?10:5)); }
   else if(e.key==='Home') seek(0); else if(e.key==='f') $('fs').click(); });
 requestAnimationFrame(draw);
-window.demoReady=true;
+// preload every golden frame (1274 webp, 23 MB) before playback can start, so nothing is fetched while the music plays (the draw loop only keeps its 5-frame decode lookahead)
+let ready=false, nl=0; const NF=Math.floor(dur/STEP)+1, ppTxt=$('pp').textContent; $('pp').textContent='Loading 0/'+NF+'...';
+(async()=>{ let next=0; const worker=async()=>{ while(next<NF){ const i=next++; try{ const r=await fetch('assets/gold/g'+String(i).padStart(4,'0')+'.webp'); if(r.ok) urls.set(i,URL.createObjectURL(await r.blob())); }catch(e){} $('pp').textContent='Loading '+(++nl)+'/'+NF+'...'; } };
+  await Promise.all(Array.from({length:16},worker)); ready=true; $('pp').textContent=ppTxt; window.demoReady=true; })();
