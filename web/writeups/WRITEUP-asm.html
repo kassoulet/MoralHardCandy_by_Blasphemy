@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>moral hard candy - assembly notes</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+  :root{--bg:#fff;--fg:#1d1d22;--mut:#666;--ac:#c4155a;--code:#f3f3f6;--bd:#d8d8e0}
+  @media (prefers-color-scheme:dark){:root{--bg:#0b0b10;--fg:#d8d8e0;--mut:#9a9aa8;--ac:#ff6a9a;--code:#17171f;--bd:#33333f}}
+  *{box-sizing:border-box}
+  body{margin:0 auto;max-width:62rem;padding:0 16px;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,sans-serif}
+  #wunav{display:flex;gap:16px;flex-wrap:wrap;padding-top:12px;padding-bottom:8px;border-bottom:1px solid var(--bd);font-size:14px}
+  a{color:var(--ac)}
+  h1,h2,h3,h4{line-height:1.25;margin-top:1.8em}
+  img{max-width:100%;height:auto;image-rendering:auto}
+  pre{background:var(--code);border:1px solid var(--bd);border-radius:4px;padding:10px 12px;overflow-x:auto;font-size:13px;line-height:1.4}
+  code{background:var(--code);padding:1px 4px;border-radius:3px;font-size:.92em;overflow-wrap:anywhere}
+  pre code{background:none;padding:0;overflow-wrap:normal}
+  table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%}
+  td,th{border:1px solid var(--bd);padding:4px 8px}
+  blockquote{border-left:3px solid var(--bd);margin-left:0;padding-left:14px;color:var(--mut)}
+  #TOC{font-size:14px}#TOC ul{padding-left:1.2em}
+  #TOC>ul{padding-left:0;list-style:none}
+  details#toc-box{margin:12px 0}
+  </style>
+</head>
+<body>
+<nav id="wunav"><a href="../index.html">&larr; the demo</a> <a href="WRITEUP-asm.html">asm</a> <a href="WRITEUP-effects.html">effects</a> <a href="https://github.com/placeholder/mhc">README on GitHub</a></nav>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#moral-hard-candy---assembly-notes"
+id="toc-moral-hard-candy---assembly-notes">moral hard candy - assembly
+notes</a>
+<ul>
+<li><a href="#getting-the-code-out-of-the-packer"
+id="toc-getting-the-code-out-of-the-packer">Getting the code out of the
+packer</a></li>
+<li><a
+href="#the-clock-ms-from-a-pit-counter-without-a-64-bit-divide-0x2c230"
+id="toc-the-clock-ms-from-a-pit-counter-without-a-64-bit-divide-0x2c230">The
+clock: ms from a PIT counter without a 64-bit divide (0x2c230)</a></li>
+<li><a href="#part-scheduler-driven-by-music-rows-0x1d630--0x1d800"
+id="toc-part-scheduler-driven-by-music-rows-0x1d630--0x1d800">Part
+scheduler driven by music rows (0x1d630 / 0x1d800)</a></li>
+<li><a href="#hand-written-mmx-blitters-0x82e40-"
+id="toc-hand-written-mmx-blitters-0x82e40-">Hand-written MMX blitters
+(0x82e40 ..)</a></li>
+<li><a href="#fill-and-conversion-helpers-0x83a80-"
+id="toc-fill-and-conversion-helpers-0x83a80-">Fill and conversion
+helpers (0x83a80 ..)</a></li>
+<li><a href="#what-the-screen-blit-tells-you"
+id="toc-what-the-screen-blit-tells-you">What the screen blit tells
+you</a></li>
+<li><a href="#the-two-blend-row-functions-0x82e05-and-0x82f07"
+id="toc-the-two-blend-row-functions-0x82e05-and-0x82f07">The two blend
+row functions (0x82e05 and 0x82f07)</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="moral-hard-candy---assembly-notes">moral hard candy - assembly
+notes</h1>
+<p>Everything here is from <code>CANDYD.EXE</code> (DOS build, Watcom
+C++ 32-bit flat, PMODE/W 1.33, MIDAS 0.6.2), disassembled from the image
+unpacked under Unicorn (<code>re/dis.sh START STOP</code>). Addresses
+are linear addresses in that image. Code is compiler output (Watcom,
+register calling convention) except the small hand-written blitters near
+0x82e00..0x83c20.</p>
+<h2 id="getting-the-code-out-of-the-packer">Getting the code out of the
+packer</h2>
+<p>PMODE/W is not a compressor you have to understand: the stub
+decompresses the program into extended memory and jumps to the Watcom
+entry (0x554ec). <code>re/unpack_pmodew.py</code> runs the stub's own
+loader in Unicorn with a tiny DOS/DPMI fake and dumps RAM when EIP
+reaches the entry. About a second, no packer knowledge needed. (A trap
+found on the way: the fake's DOS transfer buffer must not live where the
+program image lives, a buffer at 0x60000 silently overwrote libpng's
+filter code.)</p>
+<h2
+id="the-clock-ms-from-a-pit-counter-without-a-64-bit-divide-0x2c230">The
+clock: ms from a PIT counter without a 64-bit divide (0x2c230)</h2>
+<p><code>ms = 1000 * tick / (1193181 / divisor)</code>.
+<code>tick</code> is incremented by the timer ISR (0x2bf00). The
+<code>*1000</code> is not a <code>imul</code>:</p>
+<pre><code>lea eax,[edx*4]; sub eax,edx      ; 3t
+shl eax,3 ; add eax,edx           ; 25t
+shl eax,3                          ; 200t ... then lea ecx,[eax*4]; add ecx,eax  -&gt; 1000t</code></pre>
+<p>(<code>3*8+1=25</code>, <code>*8=200</code>, <code>*5=1000</code>),
+then two 32-bit <code>div</code>s: first the PIT frequency over the
+programmed divisor, then the scaled tick count over that. Two small
+divides, no floating point, and the result is an integer millisecond
+clock that the main loop multiplies by <code>0.001</code> to get the
+double <code>[0x10c7e8]</code> ("demo time in seconds"). Pausing is a
+flag that makes the loop skip that recomputation, which is also how the
+harness drives the demo at an arbitrary time.</p>
+<h2 id="part-scheduler-driven-by-music-rows-0x1d630--0x1d800">Part
+scheduler driven by music rows (0x1d630 / 0x1d800)</h2>
+<p>The demo does not use time to switch parts. The MIDAS position
+(<code>order&lt;&lt;8 | row</code>, from <code>0x2c1b0</code>) is polled
+by a callback (0x1d630) that appends <code>{position, ms}</code> to a
+256-entry ring buffer (<code>0x10c8ac</code>, 8 bytes per entry, write
+index <code>0x10d0ac</code>, read index <code>0x10d0b0</code>,
+<code>&amp; 0xff</code> wrap). The consumer (0x1d800) pops entries whose
+<code>ms</code> is due, compares the position with the current part's
+<code>[start, end)</code> and calls the part's virtual start/end
+functions, then forwards every event to the running part (vtable +0x1c),
+which is where beat-synchronous effects hook in. The 14 parts are
+32-byte records in a table at <code>0x4000590</code>; fields: object,
+start position, end position, <code>started</code> byte,
+<code>done</code> byte, start time (double).</p>
+<p>Consequence for the port: the demo is "a function of the music
+position" like the other DOS ports, but within a part the animation uses
+the PIT time, and some effects keep per-frame state (the harness shows
+frame(t) is deterministic but not independent of the frames drawn before
+it).</p>
+<h2 id="hand-written-mmx-blitters-0x82e40-">Hand-written MMX blitters
+(0x82e40 ..)</h2>
+<p>The software renderer (Kaspar Daugaard's "vicky") draws into 32 bpp
+surfaces and uses MMX for the per-pixel work. The alpha blend at
+0x82e7b..0x82ec5, two pixels per iteration:</p>
+<pre><code>movd mm0,[esi]      ; src pixel A          movd mm1,[edi]   ; dst A
+movd mm2,[esi+4]    ; src pixel B          movd mm3,[edi+4] ; dst B
+punpcklbw  x,mm5(0)                          ; bytes -&gt; words
+punpckhwd mm0,mm0 ; punpckhdq mm0,mm0        ; broadcast the alpha word (byte 3) to all 4 lanes
+pmullw mm0,mm1 ; psrlw mm0,8                 ; dst * a &gt;&gt; 8
+packuswb mm0,mm2 ; paddb mm0,[esi] ; pand mm6 ; movq [edi-8],mm0   ; + premultiplied src, mask the alpha byte</code></pre>
+<p>Alpha is broadcast with two unpacks instead of a shuffle table (MMX
+has no <code>pshufw</code> on a plain Pentium MMX), and the source is
+stored premultiplied (the <code>paddb</code> adds the source colour
+itself, no second multiply). The <code>&gt;&gt; 8</code> instead of
+<code>/ 255</code> is the usual cheap approximation. Since the product
+<code>dst * alpha</code> is what remains of the background, the alpha
+byte in these surfaces must be the transmittance (1 - a), i.e. the
+source is premultiplied and carries inverted alpha (inferred from the
+code, not checked against a texture). A scalar tail handles the odd
+pixel, <code>emms</code> at the end. The patch notes mention "non-MMX
+bugs": the release shipped with an MMX/non-MMX split and this is the MMX
+side.</p>
+<h2 id="fill-and-conversion-helpers-0x83a80-">Fill and conversion
+helpers (0x83a80 ..)</h2>
+<ul>
+<li><code>0x83a80</code> solid fill: align the destination to 32 bytes
+with single dword stores, then a 32-byte unrolled loop of eight
+<code>mov [eax+n],edx</code>, with
+<code>cmp BYTE PTR [eax+0x20],dl</code> placed in the loop. That
+<code>cmp</code> is a read of the next cache line: a software prefetch
+for a CPU (Pentium, 1999) that does not allocate a line on write miss,
+so the line is already in the cache when the next iteration stores into
+it.</li>
+<li><code>0x83ae9</code> 8-bit indexed to 32 bpp through a 256-entry
+table (<code>mov bl,[esi]; mov eax,[edx+ebx*4]</code>).</li>
+<li><code>0x83b17</code> plain <code>rep movsd</code>.</li>
+<li><code>0x83bb4</code> 32 bpp to <strong>24 bpp packed</strong> (VBE
+mode 0x4112 is 24 bpp). Four pixels (<code>ABCD</code>, 16 bytes) become
+three dwords (12 bytes) with
+<code>ror eax,16 / mov ah,bl / ror eax,16</code>-style rotates: no byte
+stores, no multiplies, 3 dword writes per 4 pixels, which matters
+because the destination is video memory.</li>
+</ul>
+<h2 id="what-the-screen-blit-tells-you">What the screen blit tells
+you</h2>
+<p>The scene is rendered at <strong>512x256</strong> (a 2:1 letterboxed
+picture inside 640x480), into a 32 bpp system-memory surface
+(<code>w,h,pitch,buf</code> at object +0,+4,+8,+0x10), and only the
+final per-scanline call through the converter (0x54d33, one indirect
+call per line) touches the LFB. In our emulation the destination object
+of that call is bogus (LFB+0x130, pitch 1) because the video manager is
+only half faked, which is why the first captures were black. The harness
+therefore reads the source surface directly (<code>re/harness.py</code>,
+<code>frame_png</code>).</p>
+<h2 id="the-two-blend-row-functions-0x82e05-and-0x82f07">The two blend
+row functions (0x82e05 and 0x82f07)</h2>
+<p>Both are MMX loops, two pixels per iteration. 0x82e05
+(<code>dst = (dst*A &gt;&gt; 8) + src</code>, alpha A broadcast from the
+source's top byte with punpckhwd+punpckhdq, pmullw, psrlw 8, packuswb,
+paddb, then pand 0x00ffffff) expects premultiplied sources with A =
+transmittance (255 - alpha). 0x82f07 adds an opacity: the dst weight
+comes from a 256x256 byte table indexed by [opacity][A] (looked up per
+pixel with movzx, because MMX has no gather) and the source is scaled by
+the opacity word (pmullw by a broadcast constant, psrlw 8). Sprites are
+drawn as spans of non-transparent pixels only, so fully transparent
+areas cost nothing.</p>
+</body>
+</html>

@@ -1,0 +1,13 @@
+# originals stay untracked
+CANDYD.EXE
+CANDYW.EXE
+CANDY.DAT
+7KINGSI2.XM
+BASS.DLL
+MORAL.TXT
+PATCH.TXT
+FILE_ID.DIZ
+__pycache__/
+*.pyc
+re/golden/
+re/*.bin

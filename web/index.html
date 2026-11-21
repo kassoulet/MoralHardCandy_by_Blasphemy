@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>moral hard candy - Blasphemy 1999, web player (storyboard stage)</title>
+<style>
+:root{--bg:#0b0b10;--fg:#d8d8e0;--ac:#e070a0;--bd:#3a3a48}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.4 system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh}
+header{margin:10px 12px 0;text-align:center}h1{font-size:18px;margin:0;letter-spacing:3px}small{opacity:.7}
+#stage{position:relative;aspect-ratio:4/3;width:min(calc(100% - 24px),calc((100vh - 170px)*4/3));background:#000;border:1px solid var(--bd);margin:8px 12px}
+canvas{width:100%;height:100%;display:block}
+#msg{position:absolute;left:0;right:0;bottom:6px;text-align:center;font-size:12px;color:#fff;text-shadow:0 0 4px #000,0 0 4px #000;pointer-events:none}
+#bar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;width:calc(100% - 24px);max-width:1000px;margin:2px 12px}
+#bar .grow{flex:1 1 260px;display:flex;gap:6px;align-items:center}
+button{background:#1d1d28;color:var(--fg);border:1px solid #444;border-radius:4px;padding:6px 12px;cursor:pointer;font:inherit}
+button:hover,button:focus-visible{border-color:var(--ac);outline:none}
+input[type=range]{accent-color:var(--ac);min-width:0;flex:1}
+a{color:var(--ac)}p{max-width:760px;margin:8px 12px;font-size:13px}
+</style></head><body>
+<header><h1>MORAL HARD CANDY</h1><small>Blasphemy feat. MD[tpolm] - Summer Encounter 1999 - 640x480 shown 4:3</small></header>
+<div id="stage"><canvas id="c" width="640" height="480"></canvas><div id="msg">Click Play to start the music</div></div>
+<div id="bar">
+ <button id="pp">Play</button>
+ <span class="grow"><button id="b5">-5s</button><input id="seek" type="range" min="0" max="2597" value="0" aria-label="Seek"><button id="f5">+5s</button><span id="tm">0:00 / 0:00</span></span>
+ <label><input type="checkbox" id="js" checked> JS render (part 1 only, 0-26.5 s; otherwise golden frames)</label>
+ <button id="fs">Fullscreen</button>
+</div>
+<p><b>Status: stage 2.</b> The pictures are the <i>original's own frames</i> (CANDYD.EXE run under emulation, 512x256 surface, one frame per 0.2 s of demo time, letterboxed in 4:3), not a re-implementation. The music is the original XM through libopenmpt. Pause and seek work. Re-rendering the engine in JS has only started: see the README and <a href="writeups/WRITEUP-effects.html">write-ups</a>.</p>
+<script type="module" src="main.js"></script></body></html>

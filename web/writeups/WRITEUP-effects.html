@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>moral hard candy - the effects</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+  :root{--bg:#fff;--fg:#1d1d22;--mut:#666;--ac:#c4155a;--code:#f3f3f6;--bd:#d8d8e0}
+  @media (prefers-color-scheme:dark){:root{--bg:#0b0b10;--fg:#d8d8e0;--mut:#9a9aa8;--ac:#ff6a9a;--code:#17171f;--bd:#33333f}}
+  *{box-sizing:border-box}
+  body{margin:0 auto;max-width:62rem;padding:0 16px;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,sans-serif}
+  #wunav{display:flex;gap:16px;flex-wrap:wrap;padding-top:12px;padding-bottom:8px;border-bottom:1px solid var(--bd);font-size:14px}
+  a{color:var(--ac)}
+  h1,h2,h3,h4{line-height:1.25;margin-top:1.8em}
+  img{max-width:100%;height:auto;image-rendering:auto}
+  pre{background:var(--code);border:1px solid var(--bd);border-radius:4px;padding:10px 12px;overflow-x:auto;font-size:13px;line-height:1.4}
+  code{background:var(--code);padding:1px 4px;border-radius:3px;font-size:.92em;overflow-wrap:anywhere}
+  pre code{background:none;padding:0;overflow-wrap:normal}
+  table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%}
+  td,th{border:1px solid var(--bd);padding:4px 8px}
+  blockquote{border-left:3px solid var(--bd);margin-left:0;padding-left:14px;color:var(--mut)}
+  #TOC{font-size:14px}#TOC ul{padding-left:1.2em}
+  #TOC>ul{padding-left:0;list-style:none}
+  details#toc-box{margin:12px 0}
+  </style>
+</head>
+<body>
+<nav id="wunav"><a href="../index.html">&larr; the demo</a> <a href="WRITEUP-asm.html">asm</a> <a href="WRITEUP-effects.html">effects</a> <a href="https://github.com/placeholder/mhc">README on GitHub</a></nav>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#moral-hard-candy---the-effects"
+id="toc-moral-hard-candy---the-effects">moral hard candy - the
+effects</a>
+<ul>
+<li><a href="#format-of-the-show" id="toc-format-of-the-show">Format of
+the show</a></li>
+<li><a href="#look" id="toc-look">Look</a></li>
+<li><a href="#how-the-port-stands-what-is-exact-what-is-not"
+id="toc-how-the-port-stands-what-is-exact-what-is-not">How the port
+stands (what is exact, what is not)</a></li>
+<li><a href="#part-1-title-decoded-and-ported-bit-exact"
+id="toc-part-1-title-decoded-and-ported-bit-exact">Part 1 (title),
+decoded and ported bit-exact</a></li>
+<li><a href="#te2rb-frame-anatomy-probe-not-ported"
+id="toc-te2rb-frame-anatomy-probe-not-ported">te2rb frame anatomy
+(probe, not ported)</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="moral-hard-candy---the-effects">moral hard candy - the
+effects</h1>
+<p>Blasphemy (feat. MD[tpolm]), Summer Encounter 1999. Music:
+<code>7kingsi2.xm</code> (51 orders, 259.7 s). Engine: "vicky's
+softrender engine" by Kaspar Daugaard (software rasteriser with
+flat/gouraud/textured/perspective modes, s-buffer, z-buffer, 8 and 32
+bpp textures, blending filters), a 3DS loader with keyframes and a
+material manager, libpng 1.0.2 and a JPEG decoder for the 59 PNG and 6
+JPEG textures. Everything is in <code>CANDY.DAT</code> (85 files, bytes
+XOR 0x2a: see <code>re/extract_dat.py</code>).</p>
+<h2 id="format-of-the-show">Format of the show</h2>
+<ul>
+<li>It renders at <strong>512x256</strong> (2:1) and the DOS build
+centres that in a 640x480 24 bpp mode, so the intended picture has black
+bars. The player shows it letterboxed in 4:3.</li>
+<li>14 parts, switched by <strong>music row</strong>
+(<code>order&lt;&lt;8|row</code>), see WRITEUP-asm.md. Each part is a
+C++ class with a constructor that loads its own textures and 3DS scene
+(so the loading screen counts parts), a start/end hook, a render(t) and
+an event hook for the music.</li>
+<li>Part table (positions from the EXE, times computed from the XM;
+<code>web/assets/parts.json</code>) and the DAT files each part's code
+names (<code>re/partmap.py</code>,
+<code>web/assets/partfiles.json</code>):</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>music position</th>
+<th>time</th>
+<th>what you see</th>
+<th>files it loads</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>0x0000-0x0409</td>
+<td>0-26.5 s</td>
+<td>dark screen, three grey group logos fading in over vertical
+streaks</td>
+<td>graybg, mhcbox, logo2</td>
+</tr>
+<tr>
+<td>2</td>
+<td>0x0409-0x0b00</td>
+<td>26.5-56 s</td>
+<td>orange fly-through with a thin black frame, bright light sweeps</td>
+<td>kasser, dna, offrun, te2rb.3ds</td>
+</tr>
+<tr>
+<td>3</td>
+<td>0x0b00-0x0f00</td>
+<td>56-75.2 s</td>
+<td>flying over blue glass hexagon prisms</td>
+<td>biku2, sekskant, cirkmat, knap1-4, bikube2.3ds</td>
+</tr>
+<tr>
+<td>4</td>
+<td>0x0f00-0x1202</td>
+<td>75.2-92.3 s</td>
+<td>yellow/black rings, a tunnel of arcs</td>
+<td>y-files, ringe.3ds</td>
+</tr>
+<tr>
+<td>5</td>
+<td>0x1202-0x1600</td>
+<td>92.3-112.9 s</td>
+<td>grey harbour photo with a field of blue shards, "take me away"</td>
+<td>havn2, takeaway, boxpipe2.3ds</td>
+</tr>
+<tr>
+<td>6</td>
+<td>0x1600-0x1800</td>
+<td>112.9-124.1 s</td>
+<td>orange background, a ring of glowing particles, circles</td>
+<td>handfun2, flare1, ring23</td>
+</tr>
+<tr>
+<td>7</td>
+<td>0x1800-0x1d00</td>
+<td>124.1-148.1 s</td>
+<td>glass tube in an orange tunnel, "md - jaakko manninen" credit</td>
+<td>bluebg, streger, stregerl, circlex, md, byter, slyde,
+lysobj.3ds</td>
+</tr>
+<tr>
+<td>8</td>
+<td>0x1d00-0x1e00</td>
+<td>148.1-154.5 s</td>
+<td>photo of a walking child, big "walking" caption</td>
+<td>kage.jpg, magnet, patt, manboy, walking, flares.3ds</td>
+</tr>
+<tr>
+<td>9</td>
+<td>0x1e00-0x2010</td>
+<td>154.5-165.7 s</td>
+<td>spiky yellow translucent object on a dark circuit-board
+background</td>
+<td>vly4, valser, spiff1.3ds, 4xbold.3ds</td>
+</tr>
+<tr>
+<td>10</td>
+<td>0x2010-0x2400</td>
+<td>165.7-184.9 s</td>
+<td>white hexagonal frame with striped border, orange light rays</td>
+<td>babs2b, sugarlov, belien, cirkel1-4, volum.3ds</td>
+</tr>
+<tr>
+<td>11</td>
+<td>0x2400-0x2500</td>
+<td>184.9-191.3 s</td>
+<td>rotating gold logo mark in a dotted-ring tunnel (grey industrial
+photo behind)</td>
+<td>industr1.jpg, skriver1, belien, bluedot, sortcirk, cigar.3ds,
+flarec</td>
+</tr>
+<tr>
+<td>12</td>
+<td>0x2500-0x2910</td>
+<td>191.3-212.1 s</td>
+<td>glowing blue-white sphere with a scrolling greetings text ("we would
+like to say hello to ...")</td>
+<td>inout.jpg, hulstrim, ioright, drugpush, kaspar2, glowsph.3ds</td>
+</tr>
+<tr>
+<td>13</td>
+<td>0x2910-0x2c00</td>
+<td>212.1-224.9 s</td>
+<td>glowing green sphere and black spiky star sprites (the
+<code>snefnug</code> textures) over orange</td>
+<td>orange, flarec, snefnug1-4</td>
+</tr>
+<tr>
+<td>14</td>
+<td>0x2c00-0x3200</td>
+<td>224.9-254.7 s</td>
+<td>orange cloth/torso with the "blasphemy - so like candy" logo, fading
+out over streaked checkers</td>
+<td>scrollbg, checkers, blogo1, boxphere.3ds</td>
+</tr>
+</tbody>
+</table>
+<p>(The descriptions come from the captured frames,
+<code>web/assets/gold/</code>; the "files" column is a static
+string-reference scan of each part's own functions, not a trace of what
+is drawn, so a file listed may be used by the neighbouring part sharing
+a function.)</p>
+<h2 id="look">Look</h2>
+<p>Two things give the demo its look. First, almost every part is a
+<strong>3DS scene played with its keyframes</strong> (camera path,
+object position/rotation/scale tracks) drawn translucent: glass
+hexagons, tubes, shards, a spiky ball. The renderer blends 32 bpp
+surfaces with the MMX alpha routine (WRITEUP-asm.md). Second,
+<strong>photographic textures</strong> (the 1024-ish JPEGs and the
+512x256 PNGs) are used as backgrounds and as environment maps and are
+drawn through horizontal-line distortion and cross-fades, the "video
+noise" strips visible on the harbour and walking parts.</p>
+<h2 id="how-the-port-stands-what-is-exact-what-is-not">How the port
+stands (what is exact, what is not)</h2>
+<ul>
+<li>Golden frames: exact. <code>web/assets/gold/g%04d.webp</code> are
+the frames the original's own code produced under emulation (the 32 bpp
+surface it renders, lossy webp for size), one every 0.2 s of demo time,
+stepped in order from 0 with the music-row events fed as the MIDAS
+callback would. They are the original's output, but rendered in 0.2 s
+steps: the demo keeps frame-to-frame state, so a continuous 25/50 fps
+run draws different intermediate states (a re-render of t=70 s alone
+differs from the same t reached through the stepped sequence).</li>
+<li>Part 1 (title) in JS (<code>web/part0.js</code>):
+<strong>approximate</strong>. Black surface, <code>logo2.png</code>
+(300x90) at (106,83), premultiplied alpha, times a fade curve. The fade
+is a table fitted to the golden frames (it is a function of the demo
+time, near-linear with a kink at about 3 s and 18 s), not derived from
+the code. Mean absolute difference inside the logo box against the
+golden frames: 0.2 at 2 s, 0.5 at 6 s, 1.5 at 10 s, 2.2 at 14 s, 4.0 at
+18 s, 5.1 at 20 s (levels 0-255; the original also draws vertical
+streaks that are not modelled, and after about 21 s it adds more).
+<code>node tools/part0test.mjs</code> prints these.</li>
+<li>Everything else: not ported. A bit-exact JS version means porting
+the whole software rasteriser and the 3DS keyframe player; the original
+code is available as readable disassembly (<code>re/dis.sh</code>) and
+the emulator gives golden output to diff against, but that is a larger
+job than one session.</li>
+</ul>
+<h2 id="part-1-title-decoded-and-ported-bit-exact">Part 1 (title),
+decoded and ported bit-exact</h2>
+<p>Layers, in order, on a 512x256 surface: graybg.png; the column
+streaks (each column's byte v[x] multiplies the background,
+<code>dst*v&gt;&gt;8</code>, v = clamp(255*(0.1 * sum of five sin/cos
+terms of x and time + (min(0.01491 t,3) - 0.3)))); the logo2 sprite
+faded in from 2 s (opacity min(1,(t-2)*0.03822)*0.3, applied through a
+256x256 blend table); the mhcbox frame on top. The JS port
+(<code>web/part0.js</code>) matches 132 of 133 stepped golden frames
+byte for byte and the last differs by 1 in 246 bytes.</p>
+<h2 id="te2rb-frame-anatomy-probe-not-ported">te2rb frame anatomy
+(probe, not ported)</h2>
+<p>A te2rb frame is six or seven translucent sprite layers (large orange
+gradients scaled and moved over time), a black frame, white wire lines
+(the Tube03 edges projected through the animated camera) and flashing
+scan bars at the top and bottom. The engine never calls its triangle
+fill for this part, so the port is a sprite compositor plus a line
+drawer.</p>
+</body>
+</html>
