@@ -26,7 +26,7 @@ let partfiles=[]; try{ partfiles=(await (await fetch('assets/partfiles.json')).j
 async function start(){
   if(started) return; started=true; $('msg').textContent='';
   const {ChiptuneJsPlayer}=await import('./vendor/chiptune3.js');
-  ac=new AudioContext(); cp=new ChiptuneJsPlayer({context:ac,repeatCount:0,interpolationFilter:8});
+  ac=new AudioContext(); cp=new ChiptuneJsPlayer({context:ac,repeatCount:0,interpolationFilter:8});cp.gain.connect(ac.destination);
   await new Promise(r=>cp.onInitialized(r));
   buf=await (await fetch('assets/7kingsi2.xm')).arrayBuffer(); cp.play(buf); playing=true; tBase=0; wall0=now(); $('pp').textContent='Pause';
 }
