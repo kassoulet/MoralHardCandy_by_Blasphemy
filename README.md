@@ -3,7 +3,7 @@
 Original: `CANDYD.EXE` (DOS) / `CANDYW.EXE` (Windows), `CANDY.DAT`, `7KINGSI2.XM` (patched release: see `PATCH.TXT`). Canonical for the RE: the DOS build (PMODE/W, Watcom C++, MIDAS, VESA, PIT clock).
 
 ## Player
-`cd web && python3 -m http.server 8000`. 4:3 (the demo's 512x256 picture letterboxed in 640x480 as on the original), play/pause (`p`/space), seek (slider, arrows, Home), fullscreen (`f`). `node tools/uitest.mjs` (headless Chrome, CDP): play/pause/seek/keyboard/JS-render smoke test.
+`cd web && python3 -m http.server 8000`. 4:3 (the demo's 512x256 picture letterboxed in 512x384, shown at an integer scale without resampling), play/pause (`p`/space), seek (slider, arrows, Home), fullscreen (`f`). `node tools/uitest.mjs` (headless Chrome, CDP): play/pause/seek/keyboard/JS-render smoke test.
 
 ## What is exact and what is not (honest section)
 | Part | Status |

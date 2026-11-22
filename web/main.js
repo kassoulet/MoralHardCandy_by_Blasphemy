@@ -4,7 +4,7 @@ const fmt=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
 let frames=[], imgs=[], dur=259.74, playing=false, tBase=0, wall0=0, cp=null, ac=null, buf=null, started=false, last=-1;
 const now=()=>performance.now()/1000, cur=()=>playing?Math.min(dur,tBase+(now()-wall0)):tBase;
 let parts=[]; try{ const j=await (await fetch('assets/parts.json')).json(); parts=j.parts; dur=j.length; sk.max=Math.round(dur*10); }catch(e){}
-// Golden frames: what the ORIGINAL CANDYD.EXE drew (512x256 surface, captured under emulation every 0.2 s, see re/harness.py), letterboxed in 640x480.
+// Golden frames: what the ORIGINAL CANDYD.EXE drew (512x256 surface, captured under emulation every 0.2 s, see re/harness.py), letterboxed in 512x384.
 // parts.json = the original's 14-part table at music times.
 const STEP=0.2, cache=new Map(), urls=new Map();   // urls: frame index -> blob URL of the preloaded file
 const frameAt=i=>{ let im=cache.get(i); if(!im){ im=new Image(); im.src=urls.get(i)||'assets/gold/g'+String(i).padStart(4,'0')+'.webp'; im.decode().catch(()=>{}); cache.set(i,im); if(cache.size>400) cache.delete(cache.keys().next().value); } return im; };
@@ -15,9 +15,9 @@ js.onchange=()=>{ shown=-1; };
 function draw(){
   const t=cur(), i=Math.min(Math.floor(dur/STEP),Math.floor(t/STEP)), p=parts.find(p=>t>=p.t0&&t<p.t1)||parts[parts.length-1];
   for(let k=1;k<=5;k++) frameAt(i+k);
-  if(js.checked&&A0&&t<26.5){ renderPart0(buf0,t,A0); ctx.fillStyle='#000'; ctx.fillRect(0,0,640,480); ctx.putImageData(id0,64,112); shown=-2; } else {
+  if(js.checked&&A0&&t<26.5){ renderPart0(buf0,t,A0); ctx.fillStyle='#000'; ctx.fillRect(0,0,512,384); ctx.putImageData(id0,0,64); shown=-2; } else {
   const im=frameAt(i);
-  if(im.complete&&im.naturalWidth&&shown!==i){ ctx.fillStyle='#000'; ctx.fillRect(0,0,640,480); ctx.drawImage(im,64,112); shown=i; } }
+  if(im.complete&&im.naturalWidth&&shown!==i){ ctx.fillStyle='#000'; ctx.fillRect(0,0,512,384); ctx.drawImage(im,0,64); shown=i; } }
   $('msg').textContent=p?'part '+(p.i+1)+'/'+parts.length+'  '+(partfiles[p.i]||[]).join(' '):'';
   $('tm').textContent=fmt(t)+' / '+fmt(dur); if(!sk.matches(':active')) sk.value=Math.round(t*10);
   requestAnimationFrame(draw);
@@ -48,3 +48,6 @@ requestAnimationFrame(draw);
 let ready=false, nl=0; const NF=Math.floor(dur/STEP)+1, ppTxt=$('pp').textContent; $('pp').textContent='Loading 0/'+NF+'...';
 (async()=>{ let next=0; const worker=async()=>{ while(next<NF){ const i=next++; try{ const r=await fetch('assets/gold/g'+String(i).padStart(4,'0')+'.webp'); if(r.ok) urls.set(i,URL.createObjectURL(await r.blob())); }catch(e){} $('pp').textContent='Loading '+(++nl)+'/'+NF+'...'; } };
   await Promise.all(Array.from({length:16},worker)); ready=true; $('pp').textContent=ppTxt; window.demoReady=true; })();
+// Integer scale of 512x384 in device px (no resampling) once it fits; otherwise fit the window.
+function fit(){const d=devicePixelRatio||1,st=document.getElementById('stage'),fs=!!document.fullscreenElement,aw=fs?innerWidth:innerWidth-26,ah=fs?innerHeight:innerHeight-172,f=Math.min(aw,ah*4/3)*d,k=Math.floor(f/512);if(k<1){st.style.width=st.style.height='';return;}st.style.width=(512*k/d)+'px';st.style.height=(384*k/d)+'px';}
+addEventListener('resize',fit);document.addEventListener('fullscreenchange',fit);fit();
