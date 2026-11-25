@@ -17,7 +17,7 @@ def load(path):
         elif cid==0x4110:
             n,=struct.unpack_from('<H',d,o+6); objs[cur]['v']=np.frombuffer(d,'<f4',n*3,o+8).reshape(n,3).copy()
         elif cid==0x4120:
-            n,=struct.unpack_from('<H',d,o+6); objs[cur]['f']=np.frombuffer(d,'<u2',n*4,o+8).reshape(n,4)[:,:3].copy()
+            n,=struct.unpack_from('<H',d,o+6); fa=np.frombuffer(d,'<u2',n*4,o+8).reshape(n,4); objs[cur]['f']=fa[:,:3].copy(); objs[cur]['ff']=fa[:,3].copy()
         elif cid==0x4140:
             n,=struct.unpack_from('<H',d,o+6); objs[cur]['uv']=np.frombuffer(d,'<f4',n*2,o+8).reshape(n,2).copy()
         elif cid==0x4160: objs[cur]['m']=np.frombuffer(d,'<f4',12,o+6).reshape(4,3).copy()
