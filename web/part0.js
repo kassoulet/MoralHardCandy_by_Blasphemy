@@ -15,7 +15,7 @@ export function renderPart0(out,t,A){   // out: Uint8ClampedArray W*H*4
     const s=0.1*S.sin(.125*x-c1)+0.1*S.cos(.071*x+c2)+0.1*S.cos(.363*x-c3)+0.1*S.sin(.33*x+c4)+0.1*S.sin(.705*x-c5)+(a-0.3);
     v[x]=clamp(S.trunc(s*255),0,255);
   }
-  for(let y=0;y<H;y++) for(let x=0;x<W;x++){ const i=(y*W+x)*4; for(let c=0;c<3;c++) out[i+c]=(out[i+c]*v[x])>>8; }
+  for(let y=0;y<H;y++) for(let x=0,i=y*W*4;x<W;x++,i+=4){ const k=v[x]; out[i]=(out[i]*k)>>8; out[i+1]=(out[i+1]*k)>>8; out[i+2]=(out[i+2]*k)>>8; }
   const f=clamp((t-2)*0.03822,0,1), op=clamp(S.trunc(S.fround(f*0.3)*256),0,255);
   if(f>0) for(let y=0;y<90;y++) for(let x=0;x<300;x++){ const s=(y*300+x)*4,al=A.logo[s+3]; if(!al) continue;
     const i=((y+83)*W+x+106)*4,w=op<96?A.T[op*256+255-al]:0; for(let c=0;c<3;c++) out[i+c]=(((out[i+c]*w)>>8)+((A.logo[s+c]*op)>>8))&255; }

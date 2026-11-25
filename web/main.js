@@ -9,13 +9,13 @@ let parts=[]; try{ const j=await (await fetch('assets/parts.json')).json(); part
 const STEP=0.2, cache=new Map(), urls=new Map();   // urls: frame index -> blob URL of the preloaded file
 const frameAt=i=>{ let im=cache.get(i); if(!im){ im=new Image(); im.src=urls.get(i)||'assets/gold/g'+String(i).padStart(4,'0')+'.webp'; im.decode().catch(()=>{}); cache.set(i,im); if(cache.size>400) cache.delete(cache.keys().next().value); } return im; };
 import {renderPart0,loadPart0,W as PW,H as PH} from './part0.js';
-let shown=-1, A0=null; const js=$('js'), buf0=new Uint8ClampedArray(PW*PH*4), id0=new ImageData(buf0,PW,PH);
+let shown=-1, A0=null, lastT=-1; const js=$('js'), buf0=new Uint8ClampedArray(PW*PH*4), id0=new ImageData(buf0,PW,PH);
 try{ A0=await loadPart0('assets/part0.bin'); }catch(e){ js.disabled=true; }
 js.onchange=()=>{ shown=-1; };
 function draw(){
   const t=cur(), i=Math.min(Math.floor(dur/STEP),Math.floor(t/STEP)), p=parts.find(p=>t>=p.t0&&t<p.t1)||parts[parts.length-1];
   for(let k=1;k<=5;k++) frameAt(i+k);
-  if(js.checked&&A0&&t<26.5){ renderPart0(buf0,t,A0); ctx.fillStyle='#000'; ctx.fillRect(0,0,512,384); ctx.putImageData(id0,0,64); shown=-2; } else {
+  if(js.checked&&A0&&t<26.5){ if(shown!==-2||t!==lastT){ renderPart0(buf0,t,A0); ctx.fillStyle='#000'; ctx.fillRect(0,0,512,384); ctx.putImageData(id0,0,64); shown=-2; lastT=t; } } else {
   const im=frameAt(i);
   if(im.complete&&im.naturalWidth&&shown!==i){ ctx.fillStyle='#000'; ctx.fillRect(0,0,512,384); ctx.drawImage(im,0,64); shown=i; } }
   $('msg').textContent=p?'part '+(p.i+1)+'/'+parts.length+'  '+(partfiles[p.i]||[]).join(' '):'';
