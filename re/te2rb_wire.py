@@ -20,21 +20,62 @@ def screen(t,path='golden/dat/te2rb.3ds'):
     V=F.view_matrix(pos,tg,rl[0]); M=F.tube_matrix_p((tt[0],f32(0),tt[1]),V)   # node pos = (t.x, 0, t.y)
     C=F.xform(F.engine_vertices(V3,tt),M); sx,sy=F.project(C)
     return o,C,sx,sy
-def calls(t):
+def code(c):
+    x,y,z=c; nz=-z; b=0
+    if nz>x: b|=1
+    if x>z: b|=2
+    if nz>y: b|=4
+    if y>z: b|=8
+    return b
+def lerp(A,B,t):
+    """0x329a0 camera part: t*B + (1-t)*A, float32 per op"""
+    t=f32(t); o=f32(f32(1)-t)
+    return tuple(f32(f32(t*B[k])+f32(o*A[k])) for k in range(3))
+def clip(poly,fl):
+    """0x32db0 polygon clipper: 4 Sutherland-Hodgman passes (x<-z, x>z, y<-z, y>z) over camera-space vertices; fl = edge flag bits.
+    -> (poly, flags) or None if < 3 vertices left"""
+    for m,ax,sg in ((1,0,-1),(2,0,1),(4,1,-1),(8,1,1)):
+        out=[]; nf=0; n=len(poly)
+        for i in range(n):
+            a=poly[i]; b=poly[(i+1)%n]; ia=not code(a)&m; ib=not code(b)&m
+            if ia:
+                out.append(a); nf|=(fl>>i&1)<<(len(out)-1)
+            if ia!=ib:
+                if sg<0:
+                    num=f32(-a[2]-a[ax]); den=f32(f32(b[ax]-a[ax])+f32(b[2]-a[2]))
+                else:
+                    num=f32(a[2]-a[ax]); den=f32(f32(b[ax]-a[ax])-f32(b[2]-a[2]))
+                v=lerp(a,b,f32(num/den)); out.append(v); nf|=(fl>>i&1)<<(len(out)-1)
+        poly=out; fl=nf
+    return (poly,fl) if len(poly)>=3 else None
+def calls(t,mode=1,info=None):
+    """line calls in draw order: faces queued in list order into 4096 depth buckets (head insertion), buckets drawn 0..4095"""
     o,C,sx,sy=screen(t); F_=o['Tube03']['f']; ff=o['Tube03']['ff']
-    z=C[:,2]; ok=z>0; zz=np.where(ok,z,1)
-    inside=ok&(sx>=0)&(sx<512)&(sy>=0)&(sy<256)
-    out=[]
+    q=[]
     for (a,b,cc),fl in zip(F_,ff):
-        if not(inside[a] and inside[b] and inside[cc]): continue
-        cr=f32(f32(f32(sx[b]-sx[a])*f32(sy[cc]-sy[a]))-f32(f32(sx[cc]-sx[a])*f32(sy[b]-sy[a])))
-        if not cr<0: continue
-        v=(a,b,cc)
-        for i in range(3):
+        P=[tuple(f32(x) for x in C[k]) for k in (a,b,cc)]
+        # 3D facing cull
+        e=[f32(P[1][k]-P[0][k]) for k in range(3)]; d=[f32(P[2][k]-P[0][k]) for k in range(3)]
+        n=(f32(f32(e[1]*d[2])-f32(d[1]*e[2])),f32(f32(e[2]*d[0])-f32(d[2]*e[0])),f32(f32(e[0]*d[1])-f32(d[0]*e[1])))
+        dot=f32(f32(f32(n[1]*P[0][1])+f32(n[0]*P[0][0]))+f32(n[2]*P[0][2]))
+        if dot<0: continue
+        cs=[code(p) for p in P]
+        if cs[0]&cs[1]&cs[2]: continue
+        if cs[0]|cs[1]|cs[2]:
+            r=clip(P,int(fl))
+            if r is None: continue
+            P,fl=r
+        Cn=np.array(P,f32); X,Y=F.project(Cn); n=len(P)
+        dep=f32(f32(f32(f32(P[0][2]+P[1][2])+P[2][2])*f32(1/3)))     # 0x340a0: (z0+z1+z2)*0.33333334
+        v=f32(dep*f32(f32(4096)/f32(88000))); idx=int(np.rint(f32(f32(4095)-v) if mode==1 else v))
+        out=[]
+        for i in range(n):
             if fl>>i&1:
-                r=te2rb_line.setup(sx[v[i]],sy[v[i]],sx[v[(i+1)%3]],sy[v[(i+1)%3]])
+                r=te2rb_line.setup(X[i],Y[i],X[(i+1)%n],Y[(i+1)%n])
                 if r: out.append((BASE+r[0],r[1],r[2],r[3]&0xffffffff,r[4]&0xffffffff,r[5]))
-    return out
+        q.append((idx,len(q),out))
+        if info is not None: info.extend((c,idx,dep) for c in out)
+    return [c for idx,i,out in sorted(q,key=lambda e:(e[0],-e[1])) for c in out if 0<=idx<4096]
 if __name__=='__main__':
     for T in sys.argv[1:] or ['27.0','27.2','27.4','27.6','27.8','28.0']:
         d=pickle.load(open(f'golden/pf2/LNOUT_{T}.pkl','rb'))   # dump labelled with the next step: frame = T-0.2
