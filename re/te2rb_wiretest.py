@@ -11,9 +11,9 @@ def render(cl):
         D.draw(px,W.BASE,ramp,a,n,fr,s(xs),s(ys),sl)
     return px
 for T in sys.argv[1:] or ['27.0','27.2','27.4','27.6','27.8','28.0']:
-    d=pickle.load(open(f'golden/pf/LNOUT_{T}.pkl','rb'))
+    d=pickle.load(open(f'golden/pf2/LNOUT_{T}.pkl','rb'))
     cap=[(x[0],x[1],x[2],x[4],x[5],x[6]) for x in d]
-    a=render(W.calls(float(T))); b=render(cap)
+    a=render(W.calls(float(T)-0.2)); b=render(cap)
     df=a!=b
     ch=lambda p,s:(p>>s)&255
     mx=max(int(np.abs(ch(a,s).astype(int)-ch(b,s).astype(int)).max()) for s in (0,8,16))
