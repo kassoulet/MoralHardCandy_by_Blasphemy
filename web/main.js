@@ -11,11 +11,20 @@ const frameAt=i=>{ let im=cache.get(i); if(!im){ im=new Image(); im.src=urls.get
 import {renderPart0,loadPart0,W as PW,H as PH} from './part0.js';
 let shown=-1, A0=null, lastT=-1; const js=$('js'), buf0=new Uint8ClampedArray(PW*PH*4), id0=new ImageData(buf0,PW,PH);
 try{ A0=await loadPart0('assets/part0.bin'); }catch(e){ js.disabled=true; }
+// Part 2 (te2rb, 26.5-56 s) in JS: 0x36250 pass (te2rb.js + recompiled poly_gen/fill_gen) + compositing (te2rbfx.js, flash via stretch_gen). Pure function of t, ~10 ms/frame.
+let T2=null, S2=null, FX2=null, st2=null; const buf2=new Uint8ClampedArray(PW*PH*4), id2=new ImageData(buf2,PW,PH), surf2=new Uint32Array(PW*PH);
+const infl=async u=>new Uint8Array(await new Response((await fetch(u)).body.pipeThrough(new DecompressionStream('deflate'))).arrayBuffer());
+(async()=>{ try{ const [{Te2rb},fxm]=await Promise.all([import('./te2rb.js'),import('./te2rbfx.js')]);
+  const [d,tex,fx]=await Promise.all([fetch('assets/te2rb.json').then(r=>r.json()),fetch('assets/te2rb_tex.bin').then(r=>r.arrayBuffer()),infl('assets/te2rb_fx.bin')]);
+  T2=new Te2rb(d,new Uint8Array(tex)); FX2=fxm.parseFx(fx); S2=fxm; }catch(e){ console.warn('te2rb port unavailable, golden frames used',e); } })();
+function renderTe2rb(t){ T2.render(t,surf2); S2.compose(surf2,t,FX2,S2.state(t));
+  for(let i=0;i<surf2.length;i++){ const p=surf2[i]; buf2[4*i]=p>>>16; buf2[4*i+1]=p>>>8; buf2[4*i+2]=p; buf2[4*i+3]=255; } }
 js.onchange=()=>{ shown=-1; };
 function draw(){
   const t=cur(), i=Math.min(Math.floor(dur/STEP),Math.floor(t/STEP)), p=parts.find(p=>t>=p.t0&&t<p.t1)||parts[parts.length-1];
   for(let k=1;k<=5;k++) frameAt(i+k);
-  if(js.checked&&A0&&t<26.5){ if(shown!==-2||t!==lastT){ renderPart0(buf0,t,A0); ctx.fillStyle='#000'; ctx.fillRect(0,0,512,384); ctx.putImageData(id0,0,64); shown=-2; lastT=t; } } else {
+  if(js.checked&&A0&&t<26.5){ if(shown!==-2||t!==lastT){ renderPart0(buf0,t,A0); ctx.fillStyle='#000'; ctx.fillRect(0,0,512,384); ctx.putImageData(id0,0,64); shown=-2; lastT=t; } }
+  else if(js.checked&&T2&&t>=26.5&&t<56){ if(shown!==-3||t!==lastT){ renderTe2rb(t); ctx.fillStyle='#000'; ctx.fillRect(0,0,512,384); ctx.putImageData(id2,0,64); shown=-3; lastT=t; } } else {
   const im=frameAt(i);
   if(im.complete&&im.naturalWidth&&shown!==i){ ctx.fillStyle='#000'; ctx.fillRect(0,0,512,384); ctx.drawImage(im,0,64); shown=i; } }
   $('msg').textContent=p?'part '+(p.i+1)+'/'+parts.length+'  '+(partfiles[p.i]||[]).join(' '):'';

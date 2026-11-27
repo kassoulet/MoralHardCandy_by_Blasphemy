@@ -1,7 +1,8 @@
 // te2rb (part 2) 3D pass in JS: camera/matrices/vertices in float32 (Math.fround per operation, in the order of the engine's x87 code with PC=24),
 // Sphere01 textured polygons (recompiled 0x40660, poly_gen.js) + Tube03 wire (AA additive lines, 0x300a0 setup + 0x2ff80). Port of re/te2rb_{f32,wire,line,draw,poly}.py.
 import {poly} from './poly_gen.js';
-import {setupMem,SURF,TEXB,spanFn,buildItem} from './poly.js';
+import {fill} from './fill_gen.js';
+import {setupMem,SURF,TEXB,spanFn,buildItem,addFill,buildFill} from './poly.js';
 const f=Math.fround;
 const b64=s=>{const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u.buffer;};
 const START=26.5;
@@ -44,7 +45,7 @@ export class Te2rb{
   constructor(d,tex){
     this.cam=d.cam; this.mem=setupMem(tex);
     const T=d.tube,S=d.sphere;
-    this.tube={v:new Float32Array(b64(T.v)),f:new Uint16Array(b64(T.f)),ff:new Uint8Array(b64(T.ff)),t:T.t};
+    this.tube={v:new Float32Array(b64(T.v)),f:new Uint16Array(b64(T.f)),ff:new Uint8Array(b64(T.ff)),li:new Uint8Array(b64(T.li)),t:T.t}; this.ramp3=new Uint32Array(b64(d.ramp));   // li = per-face light index (engine dump), ramp = material colour table
     this.sph={v:new Float32Array(b64(S.v)),uv:new Float32Array(b64(S.uv)),f:new Uint16Array(b64(S.f)),W:new Float32Array(b64(S.W))};
     this.ramp=new Uint32Array(256); for(let i=0;i<256;i++){const c=Math.min(255,Math.trunc(0.25*i));this.ramp[i]=((c<<16|c<<8|c)&0xfefeff)>>>0;}  // 0x2fe70 ramp, g=0.25 (every probed frame)
   }
@@ -66,7 +67,7 @@ export class Te2rb{
     {const T=this.tube,M=mm(worldTube(T.t),Vp),C=this.xform(T.v,M);
      for(let k=0;k<T.f.length/3;k++){
        const P=[0,1,2].map(i=>{const a=T.f[3*k+i];return {c:[C[3*a],C[3*a+1],C[3*a+2]],uv:null,fl:0};});
-       const r=this.face(P,false,T.ff[k]); if(r)q.push({idx:r.idx,n:q.length,kind:0,vs:r.vs,fl:r.fl});}}
+       const r=this.face(P,false,T.ff[k]); if(r)q.push({idx:r.idx,n:q.length,kind:0,vs:r.vs,fl:r.fl,li:T.li[k]});}}
     q.sort((a,b)=>a.idx-b.idx||b.n-a.n);   // buckets 0..4095, head insertion (LIFO within a bucket)
     return q.filter(e=>e.idx>=0&&e.idx<4096);
   }
@@ -91,10 +92,10 @@ export class Te2rb{
   // render one frame t into surf (Uint32Array 512x256, the 0x36250 pass; target not cleared by the original, every pixel is covered by the dome)
   render(t,surf){
     const {m,mem}=this.mem; const s32=new Uint32Array(mem,SURF,512*256);
-    const fn=(m,id,a)=>spanFn(m,a);
+    const fn=(m,id,a)=>id===0x83301?addFill(m,a):spanFn(m,a);
     for(const it of this.items(t)){
       if(it.kind){poly(m,buildItem(m,it.vs.map(v=>[v.sx,v.sy,v.uz,v.vz,v.iz])),0x1f0000,fn);}
-      else wire(it.vs,this.ramp,s32);
+      else{ fill(m,buildFill(m,it.vs.map(v=>[v.sx,v.sy]),it.li,this.ramp3),0x1f0000,fn); wire(it.vs,this.ramp,s32); }
     }
     surf.set(s32);
   }

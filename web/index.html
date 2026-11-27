@@ -22,7 +22,7 @@ a{color:var(--ac)}p{max-width:760px;margin:8px 12px;font-size:13px}
 <div id="bar">
  <button id="pp">Play</button>
  <span class="grow"><button id="b5">-5s</button><input id="seek" type="range" min="0" max="2597" value="0" aria-label="Seek"><button id="f5">+5s</button><span id="tm">0:00 / 0:00</span></span>
- <label><input type="checkbox" id="js" checked> JS render (part 1 only, 0-26.5 s; otherwise golden frames)</label>
+ <label><input type="checkbox" id="js" checked> JS render (parts 1-2, 0-56 s; otherwise golden frames)</label>
  <button id="fs">Fullscreen</button>
 </div>
 <p><b>Status: stage 2.</b> The pictures are the <i>original's own frames</i> (CANDYD.EXE run under emulation, 512x256 surface, one frame per 0.2 s of demo time, letterboxed in 4:3), not a re-implementation. The music is the original XM through libopenmpt. Pause and seek work. Re-rendering the engine in JS has only started: see the README and <a href="writeups/WRITEUP-effects.html">write-ups</a>.</p>

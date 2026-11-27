@@ -29,5 +29,7 @@ ok(Math.abs(await cur()-35)<1,'Right with slider focused = +5 s: '+await cur());
 await click('pp');const q=await cur();await wait(2000);ok(await cur()>q+1,'play from seek');
 await click('pp');await seek(15);const g1=await hash();ok(!(await ev('document.getElementById("js").disabled')),'JS render checkbox available');
 await click('js');await wait(600);const j1=await hash();ok(j1!==g1&&j1!==0,'JS render draws something different from the golden frame');
+await click('js');await seek(30.6);const t1=await hash();await click('js');await wait(600);const t2=await hash();await click('js');await wait(600);
+ok(t1!==0&&t1!==t2&&t1===await hash(),'part 2 (te2rb, 30.6 s flash frame): JS render differs from golden webp and is stable');
 }catch(e){console.log('FAIL',e);bad++;}
 ch.kill();srv.close();process.exit(bad?1:0);
