@@ -9,7 +9,7 @@ def cr(fr,v,f):
     p0,p1,p2,p3=v[i-1],v[i],v[i+1],v[i+2]; d0,d1,d2=fr[i]-fr[i-1],fr[i+1]-fr[i],fr[i+2]-fr[i+1]
     m1=0.5*((p1-p0)+(p2-p1))*2*d1/(d0+d1); m2=0.5*((p2-p1)+(p3-p2))*2*d1/(d1+d2); u=(f-fr[i])/d1
     return (2*u**3-3*u**2+1)*p1+(-2*u**3+3*u**2)*p2+(u**3-2*u**2+u)*m1+(u**3-u**2)*m2
-def camera(t,path='dat/te2rb.3ds'):
+def camera(t,path='golden/dat/te2rb.3ds'):
     o,tr=m3ds.load(path); tt=o['Tube03']['m'][3].astype(float)
     K=lambda k:(lambda s:(np.array([a for a,_ in s],float),np.array([b for _,b in s],float)))(sorted(tr[k]))
     f=35*(t-26.7); p=cr(*K((45059,'Camera02',45088)),f); g=cr(*K((45060,'Camera02',45088)),f); roll=cr(*K((45059,'Camera02',45092)),f)[0]
