@@ -77,7 +77,7 @@ def p_in(uc,a,sz,_):
     it=E.ireg('EAX'); sp=E.ireg('ESP')
     d=dict(item=rd(it,0x80),itemp=it)
     nv=u32(it+12); va=u32(it+16); d['va']=va; d['vptrs']=[u32(va+4*k) for k in range(nv+2)]
-    d['verts']=[rd(p,0x80) for p in d['vptrs']]
+    d['verts']=[rd(p,0x80) for p in d['vptrs'][:nv]]
     mat=u32(it+0x38); d['mat']=rd(mat,0x80); d['matp']=mat
     tex=u32(mat+0x18); d['tex']=rd(tex,0x40) if tex else None; d['texp']=tex
     d['pre']=rd(BUF,524288); d['spans']=[]; PEND[0]=d
@@ -97,15 +97,14 @@ def span(uc,a,sz,_):
 E.mu.hook_add(UC_HOOK_CODE,p_in,begin=0x40660,end=0x40660)
 E.mu.hook_add(UC_HOOK_CODE,span,begin=0x83540,end=0x83540)
 E.mu.hook_add(UC_HOOK_CODE,p_out,begin=0x365ea,end=0x365ea)
-t=T0; t0=time.time(); allres=[]
-while t<=T1+1e-9:
+# TIMES=t1,t2,.. (env) overrides T0:T1:STEP; every time is stepped in order (the first must be <=26.2 start of the part)
+TL=[float(x) for x in os.environ['TIMES'].split(',')] if 'TIMES' in os.environ else [T0+i*STEP for i in range(int((T1-T0)/STEP+1.0001))]
+t0=time.time()
+for t in TL:
     T[0]=t; feed(t); RES.append(dict(t=t,ev=[]))
     E.mu.mem_write(TIME,struct.pack('<d',t)); E.mu.mem_write(PAUSE,b'\x01'); skip[0]=1
     try: E.mu.emu_start(E.ireg('EIP'),0,count=400000000)
     except UcError as e: print('ERR',e); break
     cur[0]=None
     cp=u32(0x10c800); print('t=%.2f part idx %d events %d (%.0fs)'%(t,(cp-0x10c790)//4,len(RES[-1]['ev']),time.time()-t0),flush=True)
-    t+=STEP
-pickle.dump(RES,open(OUT,'wb'))
-
 pickle.dump(PI,open(OUT,'wb'))
