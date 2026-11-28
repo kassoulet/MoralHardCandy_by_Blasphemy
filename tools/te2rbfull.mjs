@@ -8,6 +8,7 @@ const T=new Te2rb(d,tex), surf=new Uint32Array(512*256);
 // ACC=t0,step: use the harness' accumulated clock (t0+step+step... in doubles) for the render instead of the rounded name time
 const acc=process.env.ACC&&process.env.ACC.split(',').map(Number),accT=n=>{let x=acc[0];for(let i=0;i<n;i++)x+=acc[1];return x;};
 for(const tn of ts){ const t=acc?accT(Math.round((tn-acc[0])/acc[1])):tn;
+  if(process.env.PRE){const dt=+process.env.PRE,tp=t-dt;T.render(tp,surf);compose(surf,tp,fx,state(tp));}   // PRE=step: previous frame first (stale pixels)
   const t0=Date.now(); T.render(t,surf); const t1=Date.now(); compose(surf,t,fx,state(t)); const t2=Date.now();
   const g=fs.readFileSync(`${dir}/t${tn.toFixed(3).padStart(8,'0')}.rgb`); let bad=0,maxd=0,first=-1;
   for(let i=0;i<512*256;i++){const p=surf[i],r=p>>>16&255,gg=p>>>8&255,b=p&255,dd=Math.max(Math.abs(r-g[3*i]),Math.abs(gg-g[3*i+1]),Math.abs(b-g[3*i+2])); if(dd){bad++;if(first<0)first=i;maxd=Math.max(maxd,dd);}}

@@ -90,8 +90,10 @@ export class Te2rb{
     return {idx,vs,fl};
   }
   // render one frame t into surf (Uint32Array 512x256, the 0x36250 pass; target not cleared by the original, every pixel is covered by the dome)
+  // The original never clears the target: a pixel the dome's rasterizer leaves uncovered (rare cracks between polygons) keeps the previous frame's final pixel.
+  // So surf is also the INPUT: pass the previous composited frame (stepped playback = exact; after a seek render a frame shortly before t first).
   render(t,surf){
-    const {m,mem}=this.mem; const s32=new Uint32Array(mem,SURF,512*256);
+    const {m,mem}=this.mem; const s32=new Uint32Array(mem,SURF,512*256); s32.set(surf);
     const fn=(m,id,a)=>id===0x83301?addFill(m,a):spanFn(m,a);
     for(const it of this.items(t)){
       if(it.kind){poly(m,buildItem(m,it.vs.map(v=>[v.sx,v.sy,v.uz,v.vz,v.iz])),0x1f0000,fn);}

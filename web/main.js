@@ -17,7 +17,11 @@ const infl=async u=>new Uint8Array(await new Response((await fetch(u)).body.pipe
 (async()=>{ try{ const [{Te2rb},fxm]=await Promise.all([import('./te2rb.js'),import('./te2rbfx.js')]);
   const [d,tex,fx]=await Promise.all([fetch('assets/te2rb.json').then(r=>r.json()),fetch('assets/te2rb_tex.bin').then(r=>r.arrayBuffer()),infl('assets/te2rb_fx.bin')]);
   T2=new Te2rb(d,new Uint8Array(tex)); FX2=fxm.parseFx(fx); S2=fxm; }catch(e){ console.warn('te2rb port unavailable, golden frames used',e); } })();
-function renderTe2rb(t){ T2.render(t,surf2); S2.compose(surf2,t,FX2,S2.state(t));
+let lastRt=-1;
+function renderTe2rb(t){
+  // the render target is never cleared by the original (stale pixels in rare dome cracks): forward steps reuse the previous frame, otherwise warm up one frame earlier
+  if(!(t>lastRt&&t-lastRt<0.5)){ const tp=Math.max(26.5,t-0.04); surf2.fill(0); T2.render(tp,surf2); S2.compose(surf2,tp,FX2,S2.state(tp)); }
+  lastRt=t; T2.render(t,surf2); S2.compose(surf2,t,FX2,S2.state(t));
   for(let i=0;i<surf2.length;i++){ const p=surf2[i]; buf2[4*i]=p>>>16; buf2[4*i+1]=p>>>8; buf2[4*i+2]=p; buf2[4*i+3]=255; } }
 js.onchange=()=>{ shown=-1; };
 function draw(){
