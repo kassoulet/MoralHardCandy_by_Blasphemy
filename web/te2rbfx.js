@@ -8,7 +8,7 @@ const f=Math.fround, W=512, H=256, START=26.5;
 const dbl=(lo,hi)=>new Float64Array(new Uint32Array([lo,hi]).buffer)[0];
 // [row time (fires when the music position reaches it; 1e-6 slack for the harness' accumulated frame clock), code, flash start = the arg double]
 export const EVENTS=[[30.4,0x500,dbl(0x60000000,0x403e6666)],[35.2,0x600,dbl(0xa0000000,0x40419999)]];
-export function state(t){let pal24=0,start=-1;for(const [et,c,a] of EVENTS) if(t>=et-1e-6){start=a;pal24=c===0x500?1:0;} return {pal24,start};}
+export function state(t,slack=1e-6){let pal24=0,start=-1;for(const [et,c,a] of EVENTS) if(t>=et-slack){start=a;pal24=c===0x500?1:0;} return {pal24,start};}
 export function parseFx(b){   // b: inflated bytes of te2rb_fx.bin
   let o=0; const cut=n=>b.subarray(o,o+=n);
   const spr=(w,h)=>{const r=cut(w*h*4),d=new Uint32Array(w*h); for(let i=0;i<w*h;i++) d[i]=((255-r[4*i+3])<<24|r[4*i]<<16|r[4*i+1]<<8|r[4*i+2])>>>0; return {w,h,d};};  // stored: R,G,B + (255-alpha) in byte 3

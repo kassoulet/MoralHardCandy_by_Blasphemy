@@ -1,0 +1,278 @@
+; interior 0x37094..0x371fc (called with ebx=cur edx=prev ecx=next)
+   37094:	fld    DWORD PTR [esp+0x44]
+   37098:	fld    DWORD PTR [esp+0x48]
+   3709c:	fsub   st,st(1)
+   3709e:	fld    DWORD PTR [esp+0x4c]
+   370a2:	fsubrp st(2),st
+   370a4:	fld1
+   370a6:	fdivrp st(2),st
+   370a8:	fld1
+   370aa:	fld1
+   370ac:	fld    DWORD PTR [ebx+0x84]
+   370b2:	fld    DWORD PTR [ebx+0x88]
+   370b8:	fld1
+   370ba:	fxch   st(4)
+   370bc:	fsub   st,st(1)
+   370be:	fxch   st(3)
+   370c0:	faddp  st(1),st
+   370c2:	fxch   st(3)
+   370c4:	fsubrp st(1),st
+   370c6:	fxch   st(1)
+   370c8:	fmul   st,st(1)
+   370ca:	fxch   st(2)
+   370cc:	fmulp  st(1),st
+   370ce:	fld1
+   370d0:	fld    DWORD PTR [ebx+0x8c]
+   370d6:	fxch   st(1)
+   370d8:	fadd   st,st(1)
+   370da:	fxch   st(3)
+   370dc:	fst    QWORD PTR [esp+0x10]
+   370e0:	fxch   st(3)
+   370e2:	fstp   QWORD PTR [esp+0x18]
+   370e6:	fxch   st(2)
+   370e8:	fmul   QWORD PTR [esp+0x18]
+   370ec:	fld1
+   370ee:	fsubrp st(3),st
+   370f0:	fld    st(1)
+   370f2:	fmul   st,st(3)
+   370f4:	fxch   st(2)
+   370f6:	fmul   QWORD PTR [esp+0x18]
+   370fa:	fld    QWORD PTR [esp+0x10]
+   370fe:	fmulp  st(4),st
+   37100:	fxch   st(5)
+   37102:	fstp   DWORD PTR [esp+0x40]
+   37106:	fxch   st(3)
+   37108:	fmul   DWORD PTR [esp+0x40]
+   3710c:	fxch   st(3)
+   3710e:	fstp   DWORD PTR [esp+0x24]
+   37112:	fld    DWORD PTR [ebx+0x8]
+   37115:	fsub   DWORD PTR [edx+0x8]
+   37118:	fld    DWORD PTR [esp+0x24]
+   3711c:	fmul   st,st(1)
+   3711e:	fxch   st(5)
+   37120:	fst    DWORD PTR [esp+0x2c]
+   37124:	fmul   st,st(1)
+   37126:	fxch   st(2)
+   37128:	fstp   DWORD PTR [esp+0x28]
+   3712c:	fld    DWORD PTR [ecx+0x8]
+   3712f:	fsub   DWORD PTR [ebx+0x8]
+   37132:	fld    DWORD PTR [esp+0x28]
+   37136:	fxch   st(1)
+   37138:	fstp   DWORD PTR [esp+0x3c]
+   3713c:	fmul   DWORD PTR [esp+0x3c]
+   37140:	fld    DWORD PTR [esp+0x4c]
+   37144:	fsub   DWORD PTR [esp+0x48]
+   37148:	fxch   st(4)
+   3714a:	fst    DWORD PTR [esp+0x30]
+   3714e:	fmul   DWORD PTR [esp+0x3c]
+   37152:	fxch   st(4)
+   37154:	fmul   DWORD PTR [esp+0x40]
+   37158:	fxch   st(1)
+   3715a:	faddp  st(6),st
+   3715c:	fxch   st(3)
+   3715e:	faddp  st(2),st
+   37160:	fxch   st(4)
+   37162:	fmul   st,st(3)
+   37164:	fxch   st(1)
+   37166:	fmul   st,st(2)
+   37168:	fld    DWORD PTR [ebx+0xc]
+   3716b:	fxch   st(2)
+   3716d:	fstp   DWORD PTR [ebx+0x18]
+   37170:	fstp   DWORD PTR [ebx+0x28]
+   37173:	fsub   DWORD PTR [edx+0xc]
+   37176:	fld    DWORD PTR [esp+0x24]
+   3717a:	fxch   st(1)
+   3717c:	fstp   st(4)
+   3717e:	fmul   st,st(3)
+   37180:	fld    DWORD PTR [esp+0x2c]
+   37184:	fld    DWORD PTR [ecx+0xc]
+   37187:	fsub   DWORD PTR [ebx+0xc]
+   3718a:	fxch   st(1)
+   3718c:	fmul   st,st(5)
+   3718e:	fxch   st(1)
+   37190:	fstp   DWORD PTR [esp+0x3c]
+   37194:	fld    DWORD PTR [esp+0x28]
+   37198:	fmul   DWORD PTR [esp+0x3c]
+   3719c:	fld    DWORD PTR [esp+0x30]
+   371a0:	fmul   DWORD PTR [esp+0x3c]
+   371a4:	fxch   st(1)
+   371a6:	faddp  st(3),st
+   371a8:	faddp  st(1),st
+   371aa:	fxch   st(1)
+   371ac:	fmul   st,st(3)
+   371ae:	fxch   st(1)
+   371b0:	fmul   st,st(2)
+   371b2:	fld    DWORD PTR [ebx+0x10]
+   371b5:	fxch   st(2)
+   371b7:	fstp   DWORD PTR [ebx+0x1c]
+   371ba:	fstp   DWORD PTR [ebx+0x2c]
+   371bd:	fsub   DWORD PTR [edx+0x10]
+   371c0:	fstp   st(3)
+   371c2:	fld    DWORD PTR [esp+0x24]
+   371c6:	fmul   st,st(3)
+   371c8:	fld    DWORD PTR [ecx+0x10]
+   371cb:	fsub   DWORD PTR [ebx+0x10]
+   371ce:	fld    DWORD PTR [esp+0x2c]
+   371d2:	fmulp  st(5),st
+   371d4:	fstp   DWORD PTR [esp+0x3c]
+   371d8:	fld    DWORD PTR [esp+0x28]
+   371dc:	fmul   DWORD PTR [esp+0x3c]
+   371e0:	fld    DWORD PTR [esp+0x30]
+   371e4:	fmul   DWORD PTR [esp+0x3c]
+   371e8:	fxch   st(1)
+   371ea:	faddp  st(2),st
+   371ec:	faddp  st(4),st
+   371ee:	fmulp  st(2),st
+   371f0:	fmulp  st(2),st
+   371f2:	fstp   DWORD PTR [ebx+0x20]
+   371f5:	fstp   DWORD PTR [ebx+0x30]
+   371f8:	add    esp,0x50
+   371fb:	pop    esi
+; first key 0x37230..0x372f3 (ebx=key1, edx=key0, ecx=key2)
+   37230:	sub    esp,0x1c
+   37233:	fld    DWORD PTR [ecx]
+   37235:	fsub   DWORD PTR [edx]
+   37237:	fmul   DWORD PTR ds:0x102e5e
+   3723d:	fld    DWORD PTR [ebx]
+   3723f:	fsub   DWORD PTR [edx]
+   37241:	fdivrp st(1),st
+   37243:	fld    DWORD PTR [ecx+0x8]
+   37246:	fsub   DWORD PTR [edx+0x8]
+   37249:	fld    st(0)
+   3724b:	fxch   st(2)
+   3724d:	fsubr  QWORD PTR ds:0x102e66
+   37253:	fxch   st(2)
+   37255:	fmul   st,st(2)
+   37257:	fld    DWORD PTR ds:0x102e6e
+   3725d:	fld    st(2)
+   3725f:	fmul   st,st(1)
+   37261:	fld    DWORD PTR [ebx+0x8]
+   37264:	fsub   DWORD PTR [edx+0x8]
+   37267:	fld    st(0)
+   37269:	fsub   st,st(2)
+   3726b:	fmul   DWORD PTR ds:0x102e72
+   37271:	fmul   st,st(3)
+   37273:	faddp  st(4),st
+   37275:	fxch   st(1)
+   37277:	faddp  st(3),st
+   37279:	fld1
+   3727b:	fsub   DWORD PTR [edx+0x84]
+   37281:	fmulp  st(3),st
+   37283:	fxch   st(2)
+   37285:	fstp   DWORD PTR [edx+0x28]
+   37288:	fld    DWORD PTR [ecx+0xc]
+   3728b:	fsub   DWORD PTR [edx+0xc]
+   3728e:	fst    st(3)
+   37290:	fmul   st,st(4)
+   37292:	fld    DWORD PTR [ebx+0xc]
+   37295:	fsub   DWORD PTR [edx+0xc]
+   37298:	fld    st(4)
+   3729a:	fmul   st,st(3)
+   3729c:	fxch   st(1)
+   3729e:	fst    st(4)
+   372a0:	fsub   st,st(1)
+   372a2:	fmul   DWORD PTR ds:0x102e72
+   372a8:	fmul   st,st(3)
+   372aa:	faddp  st(2),st
+   372ac:	faddp  st(1),st
+   372ae:	fld1
+   372b0:	fsub   DWORD PTR [edx+0x84]
+   372b6:	fmulp  st(1),st
+   372b8:	fstp   DWORD PTR [edx+0x2c]
+   372bb:	fld    DWORD PTR [ecx+0x10]
+   372be:	fsub   DWORD PTR [edx+0x10]
+   372c1:	fst    st(3)
+   372c3:	fmulp  st(4),st
+   372c5:	fld    DWORD PTR [ebx+0x10]
+   372c8:	fsub   DWORD PTR [edx+0x10]
+   372cb:	fxch   st(3)
+   372cd:	fmul   st,st(1)
+   372cf:	fxch   st(3)
+   372d1:	fstp   st(2)
+   372d3:	fxch   st(1)
+   372d5:	fsub   st,st(2)
+   372d7:	fmul   DWORD PTR ds:0x102e72
+   372dd:	fmulp  st(1),st
+   372df:	faddp  st(2),st
+   372e1:	faddp  st(1),st
+   372e3:	fld1
+   372e5:	fsub   DWORD PTR [edx+0x84]
+   372eb:	fmulp  st(1),st
+   372ed:	fstp   DWORD PTR [edx+0x30]
+   372f0:	add    esp,0x1c
+   372f3:	ret
+; last key 0x37300..0x373c7 (ecx=last ebx=prev edx=prev2)
+   37300:	sub    esp,0x1c
+   37303:	fld    DWORD PTR [ecx]
+   37305:	fsub   DWORD PTR [edx]
+   37307:	fmul   DWORD PTR ds:0x102e76
+   3730d:	fld    DWORD PTR [ecx]
+   3730f:	fsub   DWORD PTR [ebx]
+   37311:	fdivrp st(1),st
+   37313:	fld    DWORD PTR [ecx+0x8]
+   37316:	fsub   DWORD PTR [edx+0x8]
+   37319:	fld    st(0)
+   3731b:	fxch   st(2)
+   3731d:	fsubr  QWORD PTR ds:0x102e7e
+   37323:	fxch   st(2)
+   37325:	fmul   st,st(2)
+   37327:	fld    DWORD PTR ds:0x102e86
+   3732d:	fld    st(2)
+   3732f:	fmul   st,st(1)
+   37331:	fld    DWORD PTR [ecx+0x8]
+   37334:	fsub   DWORD PTR [ebx+0x8]
+   37337:	fld    st(0)
+   37339:	fsub   st,st(2)
+   3733b:	fmul   DWORD PTR ds:0x102e8a
+   37341:	fmul   st,st(3)
+   37343:	faddp  st(4),st
+   37345:	fxch   st(1)
+   37347:	faddp  st(3),st
+   37349:	fld1
+   3734b:	fsub   DWORD PTR [ecx+0x84]
+   37351:	fmulp  st(3),st
+   37353:	fld    DWORD PTR [ecx+0xc]
+   37356:	fxch   st(3)
+   37358:	fstp   DWORD PTR [ecx+0x18]
+   3735b:	fxch   st(2)
+   3735d:	fsub   DWORD PTR [edx+0xc]
+   37360:	fst    st(3)
+   37362:	fmul   st,st(4)
+   37364:	fld    DWORD PTR [ecx+0xc]
+   37367:	fsub   DWORD PTR [ebx+0xc]
+   3736a:	fld    st(4)
+   3736c:	fmul   st,st(3)
+   3736e:	fxch   st(1)
+   37370:	fst    st(4)
+   37372:	fsub   st,st(1)
+   37374:	fmul   DWORD PTR ds:0x102e8a
+   3737a:	fmul   st,st(3)
+   3737c:	faddp  st(2),st
+   3737e:	faddp  st(1),st
+   37380:	fld1
+   37382:	fsub   DWORD PTR [ecx+0x84]
+   37388:	fmulp  st(1),st
+   3738a:	fld    DWORD PTR [ecx+0x10]
+   3738d:	fxch   st(1)
+   3738f:	fstp   DWORD PTR [ecx+0x1c]
+   37392:	fsub   DWORD PTR [edx+0x10]
+   37395:	fst    st(3)
+   37397:	fmulp  st(4),st
+   37399:	fld    DWORD PTR [ecx+0x10]
+   3739c:	fsub   DWORD PTR [ebx+0x10]
+   3739f:	fxch   st(3)
+   373a1:	fmul   st,st(1)
+   373a3:	fxch   st(3)
+   373a5:	fstp   st(2)
+   373a7:	fxch   st(1)
+   373a9:	fsub   st,st(2)
+   373ab:	fmul   DWORD PTR ds:0x102e8a
+   373b1:	fmulp  st(1),st
+   373b3:	faddp  st(2),st
+   373b5:	faddp  st(1),st
+   373b7:	fld1
+   373b9:	fsub   DWORD PTR [ecx+0x84]
+   373bf:	fmulp  st(1),st
+   373c1:	fstp   DWORD PTR [ecx+0x20]
+   373c4:	add    esp,0x1c
+   373c7:	ret
